@@ -6,7 +6,7 @@
       "command": "/bin/bash",
       "args": [
         "-c",
-        "mkdir -p ./bin && rm -f ./bin/* && cp \"./program0/bin/$(cat ./program0/projectName)\" \"./program1/bin/$(cat ./program1/projectName)\" \"./program2/bin/$(cat ./program2/projectName)\" \"./program3/bin/$(cat ./program3/projectName)\" ./bin"
+        "mkdir -p ./bin && rm -f ./bin/* && cp ./input.data \"./program0/bin/$(cat ./program0/projectName)\" \"./program1/bin/$(cat ./program1/projectName)\" \"./program2/bin/$(cat ./program2/projectName)\" \"./program3/bin/$(cat ./program3/projectName)\" ./bin"
       ],
       "problemMatcher": [],
       "dependsOn": [
@@ -21,7 +21,7 @@
       "command": "/bin/bash",
       "args": [
         "-c",
-        "mkdir -p ./bin && rm -f ./bin/* && cp \"./program0/bin/$(cat ./program0/projectName)\" \"./program1/bin/$(cat ./program1/projectName)\" \"./program2/bin/$(cat ./program2/projectName)\" \"./program3/bin/$(cat ./program3/projectName)\" ./bin"
+        "mkdir -p ./bin && rm -f ./bin/* && cp ./input.data \"./program0/bin/$(cat ./program0/projectName)\" \"./program1/bin/$(cat ./program1/projectName)\" \"./program2/bin/$(cat ./program2/projectName)\" \"./program3/bin/$(cat ./program3/projectName)\" ./bin"
       ],
       "problemMatcher": [],
       "dependsOn": [

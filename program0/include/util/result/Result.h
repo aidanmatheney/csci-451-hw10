@@ -2,7 +2,7 @@
 
 #include "../macro.h"
 #include "../memory.h"
-#include "../error.h"
+#include "../guard.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -60,37 +60,41 @@
     } \
     \
     void TResult##_destroy(TResult const result) { \
+        guardNotNull(result, "result", STRINGIFY(TResult##_destroy)); \
         free(result); \
     } \
     \
     bool TResult##_isSuccess(Const##TResult const result) { \
+        guardNotNull(result, "result", STRINGIFY(TResult##_isSuccess)); \
         return result->success; \
     } \
     \
     TValue TResult##_getValue(Const##TResult const result) { \
-        if (!result->success) { \
-            abortWithErrorFmt("%s: Cannot get result value. Result is failure", STRINGIFY(TResult##_getValue)); \
-        } \
-        \
+        guardNotNull(result, "result", STRINGIFY(TResult##_getValue)); \
+        guardFmt(result->success, "%s: Cannot get result value. Result is failure", STRINGIFY(TResult##_getValue)); \
         return result->value; \
     } \
     \
     TValue TResult##_getValueAndDestroy(TResult const result) { \
-        TValue const value = TResult##_getValue(result); \
+        guardNotNull(result, "result", STRINGIFY(TResult##_getValueAndDestroy)); \
+        guardFmt(result->success, "%s: Cannot get result value. Result is failure", STRINGIFY(TResult##_getValueAndDestroy)); \
+        \
+        TValue const value = result->value; \
         TResult##_destroy(result); \
         return value; \
     } \
     \
     TError TResult##_getError(Const##TResult const result) { \
-        if (result->success) { \
-            abortWithErrorFmt("%s: Cannot get result error. Result is success", STRINGIFY(TResult##_getError)); \
-        } \
-        \
+        guardNotNull(result, "result", STRINGIFY(TResult##_getError)); \
+        guardFmt(!result->success, "%s: Cannot get result error. Result is success", STRINGIFY(TResult##_getError)); \
         return result->error; \
     } \
     \
     TError TResult##_getErrorAndDestroy(TResult const result) { \
-        TError const error = TResult##_getError(result); \
+        guardNotNull(result, "result", STRINGIFY(TResult##_getErrorAndDestroy)); \
+        guardFmt(!result->success, "%s: Cannot get result error. Result is success", STRINGIFY(TResult##_getErrorAndDestroy)); \
+        \
+        TError const error = result->error; \
         TResult##_destroy(result); \
         return error; \
     }

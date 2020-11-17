@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../memory.h"
 #include "../macro.h"
-#include "../error.h"
+#include "../memory.h"
+#include "../guard.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -56,23 +56,26 @@
     } \
     \
     void TResult##_destroy(TResult const result) { \
+        guardNotNull(result, "result", STRINGIFY(TResult##_destroy)); \
         free(result); \
     } \
     \
     bool TResult##_isSuccess(Const##TResult const result) { \
+        guardNotNull(result, "result", STRINGIFY(TResult##_isSuccess)); \
         return result->success; \
     } \
     \
     TError TResult##_getError(Const##TResult const result) { \
-        if (result->success) { \
-            abortWithErrorFmt("%s: Cannot get result error. Result is success", STRINGIFY(TResult##_getError)); \
-        } \
-        \
+        guardNotNull(result, "result", STRINGIFY(TResult##_getError)); \
+        guardFmt(!result->success, "%s: Cannot get result error. Result is success", STRINGIFY(TResult##_getError)); \
         return result->error; \
     } \
     \
     TError TResult##_getErrorAndDestroy(TResult const result) { \
-        TError const error = TResult##_getError(result); \
+        guardNotNull(result, "result", STRINGIFY(TResult##_getErrorAndDestroy)); \
+        guardFmt(!result->success, "%s: Cannot get result error. Result is success", STRINGIFY(TResult##_getErrorAndDestroy)); \
+        \
+        TError const error = result->error; \
         TResult##_destroy(result); \
         return error; \
     }

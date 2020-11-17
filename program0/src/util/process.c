@@ -5,6 +5,7 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <string.h>
 #include <errno.h>
 
@@ -62,10 +63,48 @@ void safeExecvp(
         char const * const execErrorMessage = strerror(execErrorCode);
 
         abortWithErrorFmt(
-            "%s: Failed to replace process using execvp (error code: %d; error message: \"%s\")",
+            "%s: Failed to replace process with \"%s\" using execvp (error code: %d; error message: \"%s\")",
             callerDescription,
+            filePath,
             execErrorCode,
             execErrorMessage
         );
     }
+}
+
+/**
+ * Wait for the process specified by the given ID.
+ *
+ * @param processId The process ID.
+ * @param outStatusPtr If not null and this function returns because the status of a child process is available, that
+ *                     status will be stored here.
+ * @param options waitpid options.
+ * @param callerDescription A description of the caller to be included in the error message. This could be the name of
+ *                          the calling function, plus extra information if useful.
+ *
+ * @returns The process ID.
+ */
+pid_t safeWaitpid(
+    pid_t const processId,
+    int * const outStatusPtr,
+    int const options,
+    char const * const callerDescription
+) {
+    guardNotNull(callerDescription, "callerDescription", "safeWaitPid");
+
+    pid_t const waitpidResult = waitpid(processId, outStatusPtr, options);
+    if (waitpidResult == -1) {
+        int const waitpidErrorCode = errno;
+        char const * const waitpidErrorMessage = strerror(waitpidErrorCode);
+
+        abortWithErrorFmt(
+            "%s: Failed to wait for process using waitpid (error code: %d; error message: \"%s\")",
+            callerDescription,
+            waitpidErrorCode,
+            waitpidErrorMessage
+        );
+        return -1;
+    }
+
+    return waitpidResult;
 }

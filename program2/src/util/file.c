@@ -5,6 +5,7 @@
 
 #include "../../include/util/StringBuilder.h"
 
+#include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
@@ -38,6 +39,39 @@ FILE *safeFopen(char const * const filePath, char const * const modes, char cons
             modes,
             fopenErrorCode,
             fopenErrorMessage
+        );
+        return NULL;
+    }
+
+    return file;
+}
+
+/**
+ * Open the file using fdopen. If the operation fails, abort the program with an error message.
+ *
+ * @param fileDescriptor The file descriptor.
+ * @param modes The fopen modes string.
+ * @param callerDescription A description of the caller to be included in the error message. This could be the name of
+ *                          the calling function, plus extra information if useful.
+ *
+ * @returns The opened file.
+ */
+FILE *safeFdopen(int const fileDescriptor, char const * const modes, char const * const callerDescription) {
+    guardNotNull(modes, "modes", "safeFdopen");
+    guardNotNull(callerDescription, "callerDescription", "safeFdopen");
+
+    FILE * const file = fdopen(fileDescriptor, modes);
+    if (file == NULL) {
+        int const fdopenErrorCode = errno;
+        char const * const fdopenErrorMessage = strerror(fdopenErrorCode);
+
+        abortWithErrorFmt(
+            "%s: Failed to open file %d with modes \"%s\" using fdopen (error code: %d; error message: \"%s\")",
+            callerDescription,
+            fileDescriptor,
+            modes,
+            fdopenErrorCode,
+            fdopenErrorMessage
         );
         return NULL;
     }
@@ -210,19 +244,19 @@ char *readFileLine(FILE * const file) {
 
     StringBuilder const lineBuilder = StringBuilder_create();
 
-    bool lineBeginsAtEof = true;
-    char readCharacter;
-    while (safeFgetc(&readCharacter, file, "readFileLine")) {
-        lineBeginsAtEof = false;
+    bool atEof = true;
+    char currentCharacter;
+    while (safeFgetc(&currentCharacter, file, "readFileLine")) {
+        atEof = false;
 
-        if (readCharacter == '\n') {
+        if (currentCharacter == '\n') {
             break;
         }
 
-        StringBuilder_appendChar(lineBuilder, readCharacter);
+        StringBuilder_appendChar(lineBuilder, currentCharacter);
     }
 
-    if (lineBeginsAtEof) {
+    if (atEof) {
         StringBuilder_destroy(lineBuilder);
         return NULL;
     }

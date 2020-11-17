@@ -9,3 +9,10 @@ void safeExecvp(
     char * const *argv,
     char const *callerDescription
 );
+
+pid_t safeWaitpid(
+    pid_t processId,
+    int *outStatusPtr,
+    int options,
+    char const *callerDescription
+);

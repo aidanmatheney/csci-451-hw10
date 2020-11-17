@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 FILE *safeFopen(char const *filePath, char const *modes, char const *callerDescription);
+FILE *safeFdopen(int fileDescriptor, char const *modes, char const *callerDescription);
 
 unsigned int safeFprintf(
     FILE *file,
